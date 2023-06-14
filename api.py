@@ -7,19 +7,21 @@ from dotenv import load_dotenv
 load_dotenv()
 client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
 
-# Create Spotify client
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="b86d857ac9514aacb46cbc596c4f6bbc",
-                                               client_secret=client_secret,
-                                               redirect_uri="http://localhost:8890/callback",
-                                               scope="user-top-read playlist-read-private user-library-read"))
+def get_spotify_oauth(client_secret):
+    # Create Spotify client
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="b86d857ac9514aacb46cbc596c4f6bbc",
+                                                   client_secret=client_secret,
+                                                   redirect_uri="http://localhost:8890/callback",
+                                                   scope="user-top-read playlist-read-private user-library-read"))
+    return sp
 
-def get_user_playlists(user):
+def get_user_playlists(sp,user):
     """
     Returns all playlists for a user
     """
     return sp.user_playlists(user)
 
-def get_playlist_tracks(playlist_id):
+def get_playlist_tracks(sp,playlist_id):
     """
     Returns all tracks in a playlist
     """
@@ -35,14 +37,14 @@ def get_playlist_tracks(playlist_id):
 
     return tracks
 
-def get_user_saved_tracks():
+def get_user_saved_tracks(sp):
     """
     Returns all tracks a user has liked
     """
     return sp.current_user_saved_tracks()
 
 
-def get_user_top_artists_and_tracks(time_range='medium_term', limit=20):
+def get_user_top_artists_and_tracks(sp,time_range='medium_term', limit=20):
     """
     Returns top artists and tracks for a user.
     time_range: Valid-values:
@@ -59,7 +61,7 @@ def get_user_top_artists_and_tracks(time_range='medium_term', limit=20):
 
     return top_artists, top_tracks
 
-def get_audio_features(track_ids):
+def get_audio_features(sp,track_ids):
     audio_features = []
 
     for i in range(0, len(track_ids), 50):
