@@ -11,9 +11,18 @@ client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="b86d857ac9514aacb46cbc596c4f6bbc",
                                                client_secret=client_secret,
                                                redirect_uri="http://localhost:8890/callback",
-                                               scope="playlist-read-private"))
+                                               scope="user-top-read playlist-read-private user-library-read"))
+
+def get_user_playlists(user):
+    """
+    Returns all playlists for a user
+    """
+    return sp.user_playlists(user)
 
 def get_playlist_tracks(playlist_id):
+    """
+    Returns all tracks in a playlist
+    """
     results = sp.playlist(playlist_id)
     tracks = results['tracks']['items']
 
@@ -25,6 +34,30 @@ def get_playlist_tracks(playlist_id):
         tracks.extend(results_next['items'])
 
     return tracks
+
+def get_user_saved_tracks():
+    """
+    Returns all tracks a user has liked
+    """
+    return sp.current_user_saved_tracks()
+
+
+def get_user_top_artists_and_tracks(time_range='medium_term', limit=20):
+    """
+    Returns top artists and tracks for a user.
+    time_range: Valid-values:
+                long_term (calculated from several years of data and including all new data as it becomes available),
+                medium_term (approximately last 6 months),
+                short_term (approximately last 4 weeks).
+                Default: medium_term
+    limit: The number of entities to return. Default: 20.
+           Minimum: 1. Maximum: 50. For example, for 'current_user_saved_tracks(limit=50)',
+           a Playlist object will be returned with maximum 50 items.
+    """
+    top_artists = sp.current_user_top_artists(time_range=time_range, limit=limit)
+    top_tracks = sp.current_user_top_tracks(time_range=time_range, limit=limit)
+
+    return top_artists, top_tracks
 
 def get_audio_features(track_ids):
     audio_features = []
